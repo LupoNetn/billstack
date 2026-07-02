@@ -1,68 +1,112 @@
-import Link from "next"
+'use client';
+
+import Link from 'next/link';
+import { Zap } from 'lucide-react';
+
+const navigation = {
+  product: [
+    { label: 'Features', href: '#features' },
+    { label: 'Pricing', href: '#pricing' },
+    { label: 'Workflow', href: '#workflow' },
+    { label: 'FAQ', href: '#faq' },
+  ],
+  developers: [
+    { label: 'Documentation', href: '#' },
+    { label: 'API Reference', href: '#' },
+    { label: 'Status', href: '#' },
+    { label: 'GitHub', href: '#' },
+  ],
+  company: [
+    { label: 'About', href: '#' },
+    { label: 'Blog', href: '#' },
+    { label: 'Careers', href: '#' },
+    { label: 'Contact', href: '#' },
+  ],
+  legal: [
+    { label: 'Privacy Policy', href: '#' },
+    { label: 'Terms of Service', href: '#' },
+    { label: 'Cookie Policy', href: '#' },
+  ],
+};
 
 export function Footer() {
   return (
-    <footer className="bg-[#0a0a0a] border-t border-border py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
-
-          {/* Brand & Description */}
-          <div className="flex flex-col items-center md:items-start max-w-sm text-center md:text-left">
-            <div className="text-xl font-bold tracking-tight text-foreground flex items-center mb-4">
-              <div className="h-6 w-6 rounded-md bg-primary mr-2 flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-white"></div>
+    <footer className="px-6 bg-[#000000] border-t border-white/[0.05]">
+      <div className="max-w-7xl mx-auto py-20">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-5 group inline-flex">
+              <div className="w-7 h-7 rounded-[8px] bg-white flex items-center justify-center transition-transform group-hover:scale-105">
+                <Zap className="w-4 h-4 text-black fill-black" />
               </div>
-              Noitrex
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Subscription billing infrastructure for Nigerian SaaS.
+              <span className="font-semibold text-base tracking-tight text-white">Billstack</span>
+            </Link>
+            <p className="text-[#71717A] text-[13px] leading-relaxed max-w-[200px]">
+              Subscription infrastructure engineered for modern African SaaS.
             </p>
           </div>
 
-          {/* Links Grid */}
-          <div className="grid grid-cols-2 gap-12 sm:grid-cols-3">
-            <div>
-              <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase mb-4">Developers</h3>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Documentation</a>
+          {/* Nav Columns */}
+          <div>
+            <h4 className="text-white font-medium mb-5 text-[13px] tracking-wide">Product</h4>
+            <ul className="space-y-3.5">
+              {navigation.product.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-[#71717A] hover:text-white text-[13px] transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">API Reference</a>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-medium mb-5 text-[13px] tracking-wide">Developers</h4>
+            <ul className="space-y-3.5">
+              {navigation.developers.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-[#71717A] hover:text-white text-[13px] transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">GitHub</a>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-medium mb-5 text-[13px] tracking-wide">Company</h4>
+            <ul className="space-y-3.5">
+              {navigation.company.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-[#71717A] hover:text-white text-[13px] transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase mb-4">Platform</h3>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Status Page</a>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-medium mb-5 text-[13px] tracking-wide">Legal</h4>
+            <ul className="space-y-3.5">
+              {navigation.legal.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-[#71717A] hover:text-white text-[13px] transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase mb-4">Legal</h3>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms</a>
-                </li>
-              </ul>
-            </div>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted">
-          <p>Built on Nomba. © {new Date().getFullYear()} Noitrex.</p>
+        <div className="pt-8 border-t border-white/[0.05] flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-[#52525B] text-[13px]">
+            © {new Date().getFullYear()} Billstack. All rights reserved.
+          </p>
+          <p className="text-[#52525B] text-[13px]">
+            Built on the <span className="text-[#A1A1AA]">Nomba API</span>
+          </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
