@@ -32,12 +32,12 @@ export default function SplitConfigTab() {
   });
 
   const totalPercentage = configs
-    .filter((c: any) => c.active && c.split_type === 'percentage')
-    .reduce((sum: number, c: any) => sum + (c.value || 0), 0);
+    .filter((c: Record<string, any>) => c.active && c.split_type === 'percentage')
+    .reduce((sum: number, c: Record<string, any>) => sum + (c.value || 0), 0);
 
   const isExceeding = totalPercentage > 100;
 
-  const handleOpenEdit = (config: any) => {
+  const handleOpenEdit = (config: Record<string, any>) => {
     setEditingId(config.id);
     setFormData({
       label: config.label,
@@ -98,7 +98,10 @@ export default function SplitConfigTab() {
     if (!confirm('Are you sure you want to delete this split configuration?')) return;
     deleteSplit.mutate(id, {
       onSuccess: () => toast.success('Split configuration deleted'),
-      onError: (err: any) => toast.error(err.response?.data?.message || 'Failed to delete configuration')
+      onError: (err: unknown) => {
+        const error = err as { response?: { data?: { message?: string } } };
+        toast.error(error.response?.data?.message || 'Failed to delete configuration');
+      }
     });
   };
 
@@ -114,7 +117,7 @@ export default function SplitConfigTab() {
           <p className="text-sm text-[#6B7280]">Automatically route portions of every payment to different accounts.</p>
         </div>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
+          <SheetTrigger>
             <Button onClick={handleOpenCreate} className="bg-[#5B21B6] hover:bg-[#7C3AED] text-white gap-2">
               <Plus className="w-4 h-4" /> Add Split
             </Button>
@@ -140,7 +143,7 @@ export default function SplitConfigTab() {
               
               <div className="grid gap-2">
                 <Label htmlFor="recepient_type" className="text-[#111827]">Recipient Type</Label>
-                <Select value={formData.recepient_type} onValueChange={v => setFormData({...formData, recepient_type: v})}>
+                <Select value={formData.recepient_type} onValueChange={v => setFormData({...formData, recepient_type: v as string})}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -168,7 +171,7 @@ export default function SplitConfigTab() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="split_type" className="text-[#111827]">Split Type</Label>
-                  <Select value={formData.split_type} onValueChange={v => setFormData({...formData, split_type: v})}>
+                  <Select value={formData.split_type} onValueChange={v => setFormData({...formData, split_type: v as string})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -251,7 +254,7 @@ export default function SplitConfigTab() {
               </tr>
             </thead>
             <tbody>
-              {configs.map((config: any) => (
+              {configs.map((config: Record<string, any>) => (
                 <tr key={config.id} className="border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB] transition-colors">
                   <td className="px-6 py-4 font-medium text-[#111827]">{config.label}</td>
                   <td className="px-6 py-4">

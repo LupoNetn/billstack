@@ -2,6 +2,16 @@
 
 import { useState } from 'react';
 import { useGetSubscriptions, useCancelSubscription, usePauseSubscription } from '@/lib/queries/subscriptions';
+
+interface Subscription {
+  id: string;
+  customer?: { name?: string; email?: string };
+  plan?: { name?: string; amount?: number; billing_cadence?: string };
+  status: string;
+  current_period_start?: string;
+  current_period_end?: string;
+}
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -16,17 +26,20 @@ export default function SubscriptionsPage() {
   const { data: subscriptionsData, isLoading } = useGetSubscriptions();
   const cancelSubscription = useCancelSubscription();
   const pauseSubscription = usePauseSubscription();
-
-  const subscriptions = (subscriptionsData?.data || []).filter((sub: any) => 
-    sub.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    sub.plan?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  
+  const subscriptions = (subscriptionsData || []).filter((sub: Subscription) =>
+  sub.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  sub.plan?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCancel = (id: string) => {
     if (!confirm('Are you sure you want to cancel this subscription immediately?')) return;
     cancelSubscription.mutate(id, {
       onSuccess: () => toast.success('Subscription cancelled'),
-      onError: (err: any) => toast.error(err.response?.data?.message || 'Failed to cancel subscription')
+      onError: (err: unknown) => {
+        const error = err as { response?: { data?: { message?: string } } };
+        toast.error(error.response?.data?.message || 'Failed to cancel subscription');
+      }
     });
   };
 
@@ -38,7 +51,10 @@ export default function SubscriptionsPage() {
     
     pauseSubscription.mutate({ id, status }, {
       onSuccess: () => toast.success(`Subscription ${action}d`),
-      onError: (err: any) => toast.error(err.response?.data?.message || `Failed to ${action} subscription`)
+      onError: (err: unknown) => {
+        const error = err as { response?: { data?: { message?: string } } };
+        toast.error(error.response?.data?.message || `Failed to ${action} subscription`);
+      }
     });
   };
 
@@ -109,7 +125,7 @@ export default function SubscriptionsPage() {
                   </td>
                 </tr>
               ) : (
-                subscriptions.map((sub: any) => (
+                subscriptions.map((sub: Subscription) => (
                   <tr key={sub.id} className="border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB]/50 transition-colors group">
                     <td className="px-6 py-4">
                       <p className="font-medium text-[#111827]">{sub.customer?.name || 'Unknown'}</p>
@@ -135,7 +151,7 @@ export default function SubscriptionsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger>
                           <Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
                             <MoreHorizontal className="h-4 w-4 text-[#6B7280]" />
                           </Button>

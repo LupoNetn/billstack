@@ -32,8 +32,9 @@ export default function SettlementAccountsTab() {
         setIsOpen(false);
         setFormData({ bank_name: '', account_number: '', account_name: '', bank_code: '', is_primary: true });
       },
-      onError: (err: any) => {
-        toast.error(err.response?.data?.message || 'Failed to add account');
+      onError: (err: unknown) => {
+        const error = err as { response?: { data?: { message?: string } } };
+        toast.error(error.response?.data?.message || 'Failed to add account');
       }
     });
   };
@@ -46,7 +47,7 @@ export default function SettlementAccountsTab() {
           <p className="text-sm text-[#6B7280]">Where your funds will be paid out.</p>
         </div>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
+          <SheetTrigger>
             <Button className="bg-[#5B21B6] hover:bg-[#7C3AED] text-white gap-2">
               <Plus className="w-4 h-4" /> Add Account
             </Button>
@@ -119,7 +120,7 @@ export default function SettlementAccountsTab() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {accounts.map((acc: any) => (
+          {accounts.map((acc: Record<string, any>) => (
             <div key={acc.id} className="p-4 rounded-xl border border-[#E5E7EB] bg-white shadow-sm flex items-start justify-between hover:border-[#5B21B6]/30 transition-colors">
               <div className="flex gap-4">
                 <div className="w-10 h-10 rounded-full bg-[#F5F3FF] flex items-center justify-center shrink-0">

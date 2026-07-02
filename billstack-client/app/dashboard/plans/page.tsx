@@ -128,7 +128,7 @@ export default function PlansPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger>
                           <Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
                             <MoreHorizontal className="h-4 w-4 text-[#6B7280]" />
                           </Button>

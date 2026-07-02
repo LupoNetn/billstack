@@ -117,7 +117,7 @@ export default function CreatePlanSlideOver({ open, onOpenChange, plan }: { open
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="plan_type" className="text-[#111827]">Plan Type</Label>
-                <Select value={formData.plan_type} onValueChange={v => setFormData({...formData, plan_type: v})}>
+                <Select value={formData.plan_type} onValueChange={v => setFormData({...formData, plan_type: v as string})}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -129,7 +129,7 @@ export default function CreatePlanSlideOver({ open, onOpenChange, plan }: { open
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="billing_cadence" className="text-[#111827]">Billing Cadence</Label>
-                <Select value={formData.billing_cadence} onValueChange={v => setFormData({...formData, billing_cadence: v})}>
+                <Select value={formData.billing_cadence} onValueChange={v => setFormData({...formData, billing_cadence: v as string})}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

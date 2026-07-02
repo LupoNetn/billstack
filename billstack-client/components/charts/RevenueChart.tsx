@@ -44,7 +44,7 @@ export function RevenueChart({ data = [] }: RevenueChartProps) {
             padding: '12px'
           }}
           itemStyle={{ color: '#fff' }}
-          formatter={(value: number) => [`₦${value.toLocaleString()}`, 'Revenue']}
+          formatter={(value: any) => [`₦${Number(value).toLocaleString()}`, 'Revenue']}
           labelFormatter={(value) => {
             const date = new Date(value);
             return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });

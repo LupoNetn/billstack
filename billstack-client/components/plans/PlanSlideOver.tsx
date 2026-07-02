@@ -71,7 +71,7 @@ export default function PlanSlideOver({ open, onClose, plan }: Props) {
   const [showCustomInterval, setShowCustomInterval] = useState(false);
 
   const createPlan = useCreatePlan();
-  const updatePlan = useUpdatePlan(plan?.id ?? '');
+  const updatePlan = useUpdatePlan();
 
   const {
     register,

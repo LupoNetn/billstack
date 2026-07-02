@@ -99,7 +99,7 @@ export default function ProfileTab() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="buisness_type" className="text-[#111827]">Business Type</Label>
-            <Select value={formData.buisness_type} onValueChange={v => setFormData({...formData, buisness_type: v})}>
+            <Select value={formData.buisness_type} onValueChange={v => setFormData({...formData, buisness_type: v as string})}>
               <SelectTrigger className="focus:ring-[#5B21B6]">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>

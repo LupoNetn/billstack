@@ -1,0 +1,26 @@
+components/charts/RevenueChart.tsx(47,11): error TS2322: Type '(value: number) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: TooltipPayloadEntry, index: number, payload: TooltipPayload) => ReactNode | [...])'.
+  Type '(value: number) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+components/dashboard/plans/CreatePlanSlideOver.tsx(120,98): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/dashboard/plans/CreatePlanSlideOver.tsx(132,104): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/dashboard/settings/ProfileTab.tsx(102,98): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/dashboard/settings/SplitConfigTab.tsx(146,103): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/dashboard/settings/SplitConfigTab.tsx(174,101): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/plans/PlanSlideOver.tsx(74,36): error TS2554: Expected 0 arguments, but got 1.
+components/settings/BusinessProfileTab.tsx(6,10): error TS2305: Module '"@/lib/queries/merchants"' has no exported member 'useMerchantMe'.
+components/settings/BusinessProfileTab.tsx(6,25): error TS2305: Module '"@/lib/queries/merchants"' has no exported member 'useUpdateMerchantProfile'.
+components/settings/PortalBrandingTab.tsx(8,10): error TS2724: '"@/lib/queries/merchants"' has no exported member named 'usePortalConfig'. Did you mean 'useGetPortalConfig'?
+components/settings/SettlementAccountsTab.tsx(8,10): error TS2724: '"@/lib/queries/merchants"' has no exported member named 'useSettlementAccounts'. Did you mean 'useGetSettlementAccounts'?
+components/settings/SettlementAccountsTab.tsx(8,33): error TS2724: '"@/lib/queries/merchants"' has no exported member named 'useAddSettlementAccount'. Did you mean 'useGetSettlementAccounts'?
+components/settings/SettlementAccountsTab.tsx(142,23): error TS7006: Parameter 'acc' implicitly has an 'any' type.
+components/settings/SplitConfigTab.tsx(8,10): error TS2724: '"@/lib/queries/merchants"' has no exported member named 'useSplitConfigs'. Did you mean 'useGetSplitConfigs'?
+components/settings/SplitConfigTab.tsx(162,21): error TS7006: Parameter 'split' implicitly has an 'any' type.
+components/settings/WebhookConfigTab.tsx(8,10): error TS2724: '"@/lib/queries/merchants"' has no exported member named 'useWebhookConfig'. Did you mean 'useGetWebhookConfig'?
+components/settings/WebhookConfigTab.tsx(8,28): error TS2724: '"@/lib/queries/merchants"' has no exported member named 'useSaveWebhookConfig'. Did you mean 'useSetWebhookConfig'?

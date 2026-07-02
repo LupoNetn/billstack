@@ -3,32 +3,35 @@ import api from '../api';
 
 export const subscriptionKeys = {
   all: ['subscriptions'] as const,
-  list: (filters: any) => ['subscriptions', 'list', filters] as const,
+  list: (filters?: Record<string, unknown>) => ['subscriptions', 'list', filters] as const,
   detail: (id: string) => ['subscriptions', 'detail', id] as const,
 };
 
-export function useGetSubscriptions(filters?: any) {
+export function useGetSubscriptions(filters?: Record<string, unknown>) {
   return useQuery({
     queryKey: subscriptionKeys.list(filters),
     queryFn: async () => {
-      // Endpoint might not exist yet, returning empty array as fallback
       try {
-        const data = await api.get(`/subscriptions`);
-        return data || [];
-      } catch (err: any) {
-        if (err?.response?.status === 404) return [];
+        const response = await api.get("/subscriptions");
+        return response.data;
+      } catch (err: unknown) {
+        if (typeof err === "object" && err !== null && "response" in err) {
+          const apiErr = err as { response?: { status?: number } };
+          if (apiErr.response?.status === 404) {
+            return [];
+          }
+        }
         throw err;
       }
     },
   });
 }
-
 export function useGetSubscription(id: string) {
   return useQuery({
     queryKey: subscriptionKeys.detail(id),
     queryFn: async () => {
-      const data = await api.get(`/subscriptions/${id}`);
-      return data;
+      const response = await api.get(`/subscriptions/${id}`);
+      return response.data;
     },
     enabled: !!id,
   });
