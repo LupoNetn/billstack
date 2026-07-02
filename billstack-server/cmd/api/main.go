@@ -53,21 +53,23 @@ func main() {
 	nombaCtx := context.Background()
 	nomba.Cache.StartRefresher(nombaCtx)
 
-	mailer, err := email.NewMailer(ctx, "./credentials.json", "./token.json")
+	var mailer *email.Mailer
+
+	mailer, err = email.NewMailer(ctx, "./credentials.json", "./token.json")
 	if err != nil {
-		slog.Error("unable to configure mailig service", "error", err)
-		return
+		slog.Warn("Email service disabled", "error", err)
+		mailer = nil
 	}
 
-	err = mailer.Send(
-		"lupooluwatobi@gmail.com",
-		"Clean Code Notification",
-		"This email was sent using our clean, reusable internal package!",
-	)
-	if err != nil {
-		slog.Error("unable to send email", "error", err)
-	} else {
-		slog.Info("Email sent successfully!")
+	if mailer != nil {
+		err = mailer.Send(
+			"lupooluwatobi@gmail.com",
+			"BillStack Notification",
+			"This email was sent using our clean, reusable internal package!",
+		)
+		if err != nil {
+			slog.Error("unable to send email", "error", err)
+		}
 	}
 
 	app := &App{
