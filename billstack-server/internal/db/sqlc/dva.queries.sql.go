@@ -88,6 +88,66 @@ func (q *Queries) CreateDVA(ctx context.Context, arg CreateDVAParams) (Dedicated
 	return i, err
 }
 
+const getDVAByAccountRef = `-- name: GetDVAByAccountRef :one
+SELECT id, merchant_id, subscription_id, customer_id, customer_name, account_ref, nomba_account_id, bank_account_number, bank_account_name, bank_name, bvn_hash, status, suspended_at, closed_at, created_at, updated_at FROM dedicated_virtual_accounts
+WHERE account_ref = $1
+LIMIT 1
+`
+
+func (q *Queries) GetDVAByAccountRef(ctx context.Context, accountRef string) (DedicatedVirtualAccount, error) {
+	row := q.db.QueryRow(ctx, getDVAByAccountRef, accountRef)
+	var i DedicatedVirtualAccount
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.SubscriptionID,
+		&i.CustomerID,
+		&i.CustomerName,
+		&i.AccountRef,
+		&i.NombaAccountID,
+		&i.BankAccountNumber,
+		&i.BankAccountName,
+		&i.BankName,
+		&i.BvnHash,
+		&i.Status,
+		&i.SuspendedAt,
+		&i.ClosedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDVAByID = `-- name: GetDVAByID :one
+SELECT id, merchant_id, subscription_id, customer_id, customer_name, account_ref, nomba_account_id, bank_account_number, bank_account_name, bank_name, bvn_hash, status, suspended_at, closed_at, created_at, updated_at FROM dedicated_virtual_accounts
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetDVAByID(ctx context.Context, id uuid.UUID) (DedicatedVirtualAccount, error) {
+	row := q.db.QueryRow(ctx, getDVAByID, id)
+	var i DedicatedVirtualAccount
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.SubscriptionID,
+		&i.CustomerID,
+		&i.CustomerName,
+		&i.AccountRef,
+		&i.NombaAccountID,
+		&i.BankAccountNumber,
+		&i.BankAccountName,
+		&i.BankName,
+		&i.BvnHash,
+		&i.Status,
+		&i.SuspendedAt,
+		&i.ClosedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateDVAStatus = `-- name: UpdateDVAStatus :exec
 UPDATE dedicated_virtual_accounts
 SET status = $1,

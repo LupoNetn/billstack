@@ -200,6 +200,42 @@ func (q *Queries) GetAllSubscriptionsForMerchant(ctx context.Context, arg GetAll
 	return items, nil
 }
 
+const getSubscriptionByID = `-- name: GetSubscriptionByID :one
+SELECT id, merchant_id, customer_id, customer_email, customer_name, plan_id, status, current_period_start, current_period_end, trial_ends_at, cancelled_at, cancel_at_period_end, cancellation_reason, paused_at, pause_resumes_at, pause_reason, payment_method_type, nomba_token_key, dva_id, metadata, created_at, updated_at FROM subscriptions
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetSubscriptionByID(ctx context.Context, id uuid.UUID) (Subscription, error) {
+	row := q.db.QueryRow(ctx, getSubscriptionByID, id)
+	var i Subscription
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.CustomerID,
+		&i.CustomerEmail,
+		&i.CustomerName,
+		&i.PlanID,
+		&i.Status,
+		&i.CurrentPeriodStart,
+		&i.CurrentPeriodEnd,
+		&i.TrialEndsAt,
+		&i.CancelledAt,
+		&i.CancelAtPeriodEnd,
+		&i.CancellationReason,
+		&i.PausedAt,
+		&i.PauseResumesAt,
+		&i.PauseReason,
+		&i.PaymentMethodType,
+		&i.NombaTokenKey,
+		&i.DvaID,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getSubscriptionForMerchantAndCustomer = `-- name: GetSubscriptionForMerchantAndCustomer :one
 SELECT id, merchant_id, customer_id, customer_email, customer_name, plan_id, status, current_period_start, current_period_end, trial_ends_at, cancelled_at, cancel_at_period_end, cancellation_reason, paused_at, pause_resumes_at, pause_reason, payment_method_type, nomba_token_key, dva_id, metadata, created_at, updated_at FROM subscriptions
 WHERE merchant_id = $1 AND customer_id = $2
@@ -343,6 +379,48 @@ func (q *Queries) StoreTokenKey(ctx context.Context, arg StoreTokenKeyParams) (S
 	return i, err
 }
 
+const storeTokenKeyBySubscriptionID = `-- name: StoreTokenKeyBySubscriptionID :one
+UPDATE subscriptions
+SET nomba_token_key = $2, updated_at = now()
+WHERE id = $1
+RETURNING id, merchant_id, customer_id, customer_email, customer_name, plan_id, status, current_period_start, current_period_end, trial_ends_at, cancelled_at, cancel_at_period_end, cancellation_reason, paused_at, pause_resumes_at, pause_reason, payment_method_type, nomba_token_key, dva_id, metadata, created_at, updated_at
+`
+
+type StoreTokenKeyBySubscriptionIDParams struct {
+	ID            uuid.UUID `json:"id"`
+	NombaTokenKey *string   `json:"nomba_token_key"`
+}
+
+func (q *Queries) StoreTokenKeyBySubscriptionID(ctx context.Context, arg StoreTokenKeyBySubscriptionIDParams) (Subscription, error) {
+	row := q.db.QueryRow(ctx, storeTokenKeyBySubscriptionID, arg.ID, arg.NombaTokenKey)
+	var i Subscription
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.CustomerID,
+		&i.CustomerEmail,
+		&i.CustomerName,
+		&i.PlanID,
+		&i.Status,
+		&i.CurrentPeriodStart,
+		&i.CurrentPeriodEnd,
+		&i.TrialEndsAt,
+		&i.CancelledAt,
+		&i.CancelAtPeriodEnd,
+		&i.CancellationReason,
+		&i.PausedAt,
+		&i.PauseResumesAt,
+		&i.PauseReason,
+		&i.PaymentMethodType,
+		&i.NombaTokenKey,
+		&i.DvaID,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateSubscriptionDvaId = `-- name: UpdateSubscriptionDvaId :exec
 UPDATE subscriptions
 SET dva_id = $1
@@ -357,4 +435,57 @@ type UpdateSubscriptionDvaIdParams struct {
 func (q *Queries) UpdateSubscriptionDvaId(ctx context.Context, arg UpdateSubscriptionDvaIdParams) error {
 	_, err := q.db.Exec(ctx, updateSubscriptionDvaId, arg.DvaID, arg.ID)
 	return err
+}
+
+const updateSubscriptionPeriodAndStatus = `-- name: UpdateSubscriptionPeriodAndStatus :one
+UPDATE subscriptions
+SET
+    status = $2,
+    current_period_start = $3,
+    current_period_end = $4,
+    updated_at = now()
+WHERE id = $1
+RETURNING id, merchant_id, customer_id, customer_email, customer_name, plan_id, status, current_period_start, current_period_end, trial_ends_at, cancelled_at, cancel_at_period_end, cancellation_reason, paused_at, pause_resumes_at, pause_reason, payment_method_type, nomba_token_key, dva_id, metadata, created_at, updated_at
+`
+
+type UpdateSubscriptionPeriodAndStatusParams struct {
+	ID                 uuid.UUID          `json:"id"`
+	Status             SubscriptionStatus `json:"status"`
+	CurrentPeriodStart pgtype.Timestamptz `json:"current_period_start"`
+	CurrentPeriodEnd   pgtype.Timestamptz `json:"current_period_end"`
+}
+
+func (q *Queries) UpdateSubscriptionPeriodAndStatus(ctx context.Context, arg UpdateSubscriptionPeriodAndStatusParams) (Subscription, error) {
+	row := q.db.QueryRow(ctx, updateSubscriptionPeriodAndStatus,
+		arg.ID,
+		arg.Status,
+		arg.CurrentPeriodStart,
+		arg.CurrentPeriodEnd,
+	)
+	var i Subscription
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.CustomerID,
+		&i.CustomerEmail,
+		&i.CustomerName,
+		&i.PlanID,
+		&i.Status,
+		&i.CurrentPeriodStart,
+		&i.CurrentPeriodEnd,
+		&i.TrialEndsAt,
+		&i.CancelledAt,
+		&i.CancelAtPeriodEnd,
+		&i.CancellationReason,
+		&i.PausedAt,
+		&i.PauseResumesAt,
+		&i.PauseReason,
+		&i.PaymentMethodType,
+		&i.NombaTokenKey,
+		&i.DvaID,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

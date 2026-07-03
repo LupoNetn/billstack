@@ -1,12 +1,27 @@
 package payments
 
 type CreateOrderRequest struct {
-	OrderReference string
-	CustomerEmail  string
-	Amount         int64
-	Currency       string
-	CallbackURL    string
-	TokenizeCard   bool
+	OrderReference        string
+	CustomerEmail         string
+	CustomerID            string
+	Amount                int64
+	Currency              string
+	CallbackURL           string
+	TokenizeCard          bool
+	AccountID             string
+	SplitRequest          *SplitRequest
+	OrderMetaData         map[string]string
+	AllowedPaymentMethods []string
+}
+
+type SplitRequest struct {
+	SplitType string
+	SplitList []SplitListItem
+}
+
+type SplitListItem struct {
+	AccountID string
+	Value     string
 }
 
 type CreateOrderResponse struct {
@@ -17,9 +32,13 @@ type CreateOrderResponse struct {
 type ChargeCardRequest struct {
 	OrderReference string
 	CustomerEmail  string
+	CustomerID     string
 	Amount         int64
 	Currency       string
 	TokenKey       string
+	CallbackURL    string
+	AccountID      string
+	SplitRequest   *SplitRequest
 }
 
 type ChargeCardResponse struct {
@@ -27,13 +46,17 @@ type ChargeCardResponse struct {
 	TransactionID string
 	DeclineCode   string
 	DeclineType   string // soft, hard, network
+	Message       string
 }
 
 type ProvisionDVARequest struct {
-	AccountRef     string `json:"accountRef"`
-	AccountName    string `json:"accountName"`
-	Bvn            string `json:"bvn"`
-	ExpectedAmount int64  `json:"expectedAmount"`
+	AccountRef     string
+	AccountName    string
+	Currency       string
+	Bvn            string
+	ExpectedAmount int64
+	ExpiryDate     string
+	CallbackURL    string
 }
 
 type ProvisionDVAResponse struct {
@@ -42,6 +65,51 @@ type ProvisionDVAResponse struct {
 	BankAccountNumber string
 	BankAccountName   string
 	BankName          string
+	Currency          string
+	Expired           bool
+}
+
+type SuspendDVARequest struct {
+	AccountID string
+}
+
+type SuspendDVAResponse struct {
+	Suspended bool
+}
+
+type ExpireDVARequest struct {
+	AccountRef string
+}
+
+type ExpireDVAResponse struct {
+	Expired bool
+}
+
+type LookupDVARequest struct {
+	Identifier string
+}
+
+type LookupDVAResponse struct {
+	AccountRef        string
+	AccountHolderID   string
+	BankAccountNumber string
+	BankAccountName   string
+	BankName          string
+	Currency          string
+	Expired           bool
+}
+
+type VerifyTransactionRequest struct {
+	TransactionID string
+}
+
+type VerifyTransactionResponse struct {
+	TransactionID string
+	MerchantTxRef string
+	AmountKobo    int64
+	Status        string
+	Type          string
+	Time          string
 }
 
 type Transaction struct {
@@ -56,21 +124,4 @@ type ListTransactionsParams struct {
 	DateFrom string
 	DateTo   string
 	Status   string
-}
-
-type WebhookEvent struct {
-	Event     string      `json:"event"`
-	RequestID string      `json:"requestId"`
-	Data      WebhookData `json:"data"`
-}
-
-type WebhookData struct {
-	MerchantTxRef string `json:"merchantTxRef"`
-	Amount        int64  `json:"amount"`
-	Currency      string `json:"currency"`
-	TransactionID string `json:"transactionId"`
-	TokenKey      string `json:"tokenKey"`
-	AccountRef    string `json:"accountRef"`
-	SenderBank    string `json:"senderBank"`
-	PaidAt        string `json:"paidAt"`
 }

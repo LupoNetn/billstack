@@ -1,6 +1,6 @@
 module github.com/luponetn/billstack
 
-go 1.25.8
+go 1.25.11
 
 require (
 	github.com/gin-contrib/cors v1.7.7

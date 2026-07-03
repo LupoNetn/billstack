@@ -28,3 +28,25 @@ UPDATE invoices
 SET nomba_order_ref = $1
 WHERE id = $2;
 
+-- name: GetInvoiceByNombaOrderRef :one
+SELECT * FROM invoices
+WHERE nomba_order_ref = $1
+LIMIT 1;
+
+-- name: GetOpenInvoiceForSubscription :one
+SELECT * FROM invoices
+WHERE subscription_id = $1 AND status = 'open'
+ORDER BY due_date ASC
+LIMIT 1;
+
+-- name: MarkInvoicePaid :one
+UPDATE invoices
+SET
+    status = 'paid',
+    amount_paid = $2,
+    paid_at = $3,
+    nomba_txn_ref = $4,
+    updated_at = now()
+WHERE id = $1 AND status = 'open'
+RETURNING *;
+

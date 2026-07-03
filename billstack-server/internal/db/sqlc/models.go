@@ -591,6 +591,7 @@ const (
 	PendingCreditReasonOverpayment               PendingCreditReason = "overpayment"
 	PendingCreditReasonAdvancePayment            PendingCreditReason = "advance_payment"
 	PendingCreditReasonMisdirected               PendingCreditReason = "misdirected"
+	PendingCreditReasonUnderpayment              PendingCreditReason = "underpayment"
 )
 
 func (e *PendingCreditReason) Scan(src interface{}) error {
@@ -1028,6 +1029,18 @@ type DunningAttempt struct {
 	SmartRetry       bool               `json:"smart_retry"`
 	NotificationSent pgtype.Bool        `json:"notification_sent"`
 	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+}
+
+type IdempotencyKey struct {
+	ID             uuid.UUID          `json:"id"`
+	IdempotencyKey string             `json:"idempotency_key"`
+	RequestMethod  string             `json:"request_method"`
+	RequestPath    string             `json:"request_path"`
+	RequestHash    string             `json:"request_hash"`
+	StatusCode     int32              `json:"status_code"`
+	ResponseBody   []byte             `json:"response_body"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
 }
 
 type Invoice struct {

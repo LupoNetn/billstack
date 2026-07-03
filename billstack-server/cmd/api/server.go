@@ -81,13 +81,12 @@ func SetupRoutes(router *gin.Engine, querier sqlc.Querier, app *App, mailer *ema
 	plansHandler := plans.NewHandler(plansService)
 	plans.NewRouter(router, plansHandler, app.Cfg.JWTAccessSecret, querier)
 
-	subscriptionsService := subscriptions.NewService(querier, dbPool, queries, paymentsService)
+	subscriptionsService := subscriptions.NewService(querier, dbPool, queries, paymentsService, app.Cfg.CardCallbackURL)
 	subscriptionsHandler := subscriptions.NewHandler(subscriptionsService)
 	subscriptions.NewRouter(router, subscriptionsHandler, querier)
 
-	webhooksService := webhooks.NewService(querier)
-	webhooksHandler := webhooks.NewHandler(webhooksService)
-	webhooks.NewRouter(router, *webhooksHandler)
+	webhooksHandler := webhooks.NewHandler(paymentsService)
+	webhooks.NewRouter(router, webhooksHandler)
 }
 
 func RunServer(router *gin.Engine, port string, querier sqlc.Querier, app *App, mailer *email.Mailer, dbPool *pgxpool.Pool, queries *sqlc.Queries, paymentsService payments.PaymentsService) error {

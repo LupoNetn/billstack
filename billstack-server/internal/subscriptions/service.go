@@ -22,18 +22,20 @@ type Service interface {
 }
 
 type Svc struct {
-	db       sqlc.Querier
-	queries  *sqlc.Queries
-	dbPool   *pgxpool.Pool
-	payments payments.PaymentsService
+	db              sqlc.Querier
+	queries         *sqlc.Queries
+	dbPool          *pgxpool.Pool
+	payments        payments.PaymentsService
+	cardCallbackURL string
 }
 
-func NewService(db sqlc.Querier, dbPool *pgxpool.Pool, queries *sqlc.Queries, payments payments.PaymentsService) Service {
+func NewService(db sqlc.Querier, dbPool *pgxpool.Pool, queries *sqlc.Queries, payments payments.PaymentsService, cardCallbackURL string) Service {
 	return &Svc{
-		db:       db,
-		dbPool:   dbPool,
-		queries:  queries,
-		payments: payments,
+		db:              db,
+		dbPool:          dbPool,
+		queries:         queries,
+		payments:        payments,
+		cardCallbackURL: cardCallbackURL,
 	}
 }
 
@@ -75,6 +77,11 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 		trialEndsAt.Valid = true
 	}
 
+	var metadata []byte
+	if arg.Metadata != nil {
+		metadata = *arg.Metadata
+	}
+
 	sub, err := qtx.CreateSubscription(ctx, sqlc.CreateSubscriptionParams{
 		MerchantID:        merchantID,
 		CustomerID:        arg.CustomerID,
@@ -84,6 +91,7 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 		PlanID:            arg.PlanID,
 		PaymentMethodType: arg.PaymentMethodType,
 		Status:            sqlc.SubscriptionStatusPending,
+		Metadata:          metadata,
 	})
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -114,6 +122,14 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 	} else {
 		InvoicePlanAmount = 0
 	}
+	now := time.Now()
+	periodEnd := payments.CalculatePeriodEnd(now, plan)
+	periodStart := pgtype.Timestamptz{Time: now, Valid: true}
+	periodEndTs := pgtype.Timestamptz{Time: periodEnd, Valid: true}
+	if trialDays > 0 {
+		periodEndTs = trialEndsAt
+	}
+
 	invoice, invoiceErr := qtx.CreateInvoice(ctx, sqlc.CreateInvoiceParams{
 		MerchantID:        merchantID,
 		SubscriptionID:    sub.ID,
@@ -121,8 +137,8 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 		InvoiceType:       sqlc.InvoiceTypeSubscription,
 		Total:             InvoicePlanAmount,
 		Currency:          plan.Currency,
-		PeriodStart:       sub.CurrentPeriodStart,
-		PeriodEnd:         sub.CurrentPeriodEnd,
+		PeriodStart:       periodStart,
+		PeriodEnd:         periodEndTs,
 		Status:            sqlc.InvoiceStatusOpen,
 		PaymentMethodType: &paymentMethod,
 		DueDate:           invoiceDueDate,
@@ -147,9 +163,10 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 		result, err := s.payments.CreateCheckOutOrder(ctx, payments.CreateOrderRequest{
 			OrderReference: orderRef,
 			CustomerEmail:  sub.CustomerEmail,
+			CustomerID:     sub.CustomerID,
 			Amount:         chargeAmount,
 			Currency:       invoice.Currency,
-			CallbackURL:    "http://localhost:3000/payement",
+			CallbackURL:    s.cardCallbackURL,
 			TokenizeCard:   true,
 		})
 		if err != nil {
@@ -206,6 +223,7 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 		result, err := s.payments.ProvisionDva(ctx, payments.ProvisionDVARequest{
 			AccountRef:     accountRef,
 			AccountName:    sub.CustomerName,
+			Currency:       plan.Currency,
 			Bvn:            arg.Bvn,
 			ExpectedAmount: int64(expectedAmount),
 		})
@@ -229,8 +247,8 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 			BankAccountNumber: result.BankAccountNumber,
 			BankAccountName:   result.BankAccountName,
 			BankName:          result.BankName,
-			BvnHash:           nil, // hash the bvn here if provided
-			Status:            "active",
+			BvnHash:           nil,
+			Status:            sqlc.DvaStatusActive,
 		})
 		if err != nil {
 			return CreateSubscriptionResponse{}, err
@@ -243,6 +261,26 @@ func (s *Svc) CreateSubscription(ctx context.Context, arg CreateSubscriptionRequ
 				Valid: true,
 			},
 			ID: sub.ID,
+		})
+		if err != nil {
+			return CreateSubscriptionResponse{}, err
+		}
+
+		state, err := json.Marshal(sub)
+		if err != nil {
+			return CreateSubscriptionResponse{}, err
+		}
+		reason := "Subscription created with DVA"
+		actorID := merchantID.String()
+		err = qtx.CreateSubscriptionEventsTimeline(ctx, sqlc.CreateSubscriptionEventsTimelineParams{
+			SubscriptionID: sub.ID,
+			MerchantID:     merchantID,
+			EventType:      "subscription_created",
+			FromState:      nil,
+			ToState:        state,
+			Actor:          "merchant",
+			ActorID:        &actorID,
+			Reason:         &reason,
 		})
 		if err != nil {
 			return CreateSubscriptionResponse{}, err

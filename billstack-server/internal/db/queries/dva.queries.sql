@@ -18,3 +18,13 @@ SET
     updated_at = now()
 WHERE merchant_id = $2 AND subscription_id = $3
 RETURNING *;
+
+-- name: GetDVAByAccountRef :one
+SELECT * FROM dedicated_virtual_accounts
+WHERE account_ref = $1
+LIMIT 1;
+
+-- name: GetDVAByID :one
+SELECT * FROM dedicated_virtual_accounts
+WHERE id = $1
+LIMIT 1;

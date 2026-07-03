@@ -13,6 +13,8 @@ type Config struct {
 	Port             string
 	JWTAccessSecret  string
 	JWTRefreshSecret string
+	AppURL           string
+	CardCallbackURL  string
 }
 
 func LoadConfig() (*Config, error) {
@@ -25,6 +27,8 @@ func LoadConfig() (*Config, error) {
 		Port:             ExtractEnvVar("PORT", "6060"),
 		JWTAccessSecret:  ExtractEnvVar("JWT_ACCESS_SECRET", ""),
 		JWTRefreshSecret: ExtractEnvVar("JWT_REFRESH_SECRET", ""),
+		AppURL:           ExtractEnvVar("APP_URL", "http://localhost:3000"),
+		CardCallbackURL:  ExtractEnvVar("CARD_CALLBACK_URL", "http://localhost:3000/payment"),
 	}
 
 	if config.DBUrl == "" {

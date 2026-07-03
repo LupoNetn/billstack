@@ -47,7 +47,7 @@ func main() {
 	defer dbPool.Close()
 
 	//Create Payments Service
-	paymentsService := payments.NewPaymentService(queries)
+	paymentsService := payments.NewPaymentService(dbPool, queries)
 
 	//implement nomba token fetch
 	nombaCtx := context.Background()

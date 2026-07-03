@@ -70,6 +70,121 @@ func (q *Queries) CreateInvoice(ctx context.Context, arg CreateInvoiceParams) (I
 	return i, err
 }
 
+const getInvoiceByNombaOrderRef = `-- name: GetInvoiceByNombaOrderRef :one
+SELECT id, merchant_id, subscription_id, customer_id, invoice_type, total, amount_paid, currency, period_start, period_end, status, payment_method_type, paid_at, due_date, nomba_order_ref, nomba_txn_ref, created_at, updated_at FROM invoices
+WHERE nomba_order_ref = $1
+LIMIT 1
+`
+
+func (q *Queries) GetInvoiceByNombaOrderRef(ctx context.Context, nombaOrderRef *string) (Invoice, error) {
+	row := q.db.QueryRow(ctx, getInvoiceByNombaOrderRef, nombaOrderRef)
+	var i Invoice
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.SubscriptionID,
+		&i.CustomerID,
+		&i.InvoiceType,
+		&i.Total,
+		&i.AmountPaid,
+		&i.Currency,
+		&i.PeriodStart,
+		&i.PeriodEnd,
+		&i.Status,
+		&i.PaymentMethodType,
+		&i.PaidAt,
+		&i.DueDate,
+		&i.NombaOrderRef,
+		&i.NombaTxnRef,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getOpenInvoiceForSubscription = `-- name: GetOpenInvoiceForSubscription :one
+SELECT id, merchant_id, subscription_id, customer_id, invoice_type, total, amount_paid, currency, period_start, period_end, status, payment_method_type, paid_at, due_date, nomba_order_ref, nomba_txn_ref, created_at, updated_at FROM invoices
+WHERE subscription_id = $1 AND status = 'open'
+ORDER BY due_date ASC
+LIMIT 1
+`
+
+func (q *Queries) GetOpenInvoiceForSubscription(ctx context.Context, subscriptionID uuid.UUID) (Invoice, error) {
+	row := q.db.QueryRow(ctx, getOpenInvoiceForSubscription, subscriptionID)
+	var i Invoice
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.SubscriptionID,
+		&i.CustomerID,
+		&i.InvoiceType,
+		&i.Total,
+		&i.AmountPaid,
+		&i.Currency,
+		&i.PeriodStart,
+		&i.PeriodEnd,
+		&i.Status,
+		&i.PaymentMethodType,
+		&i.PaidAt,
+		&i.DueDate,
+		&i.NombaOrderRef,
+		&i.NombaTxnRef,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const markInvoicePaid = `-- name: MarkInvoicePaid :one
+UPDATE invoices
+SET
+    status = 'paid',
+    amount_paid = $2,
+    paid_at = $3,
+    nomba_txn_ref = $4,
+    updated_at = now()
+WHERE id = $1 AND status = 'open'
+RETURNING id, merchant_id, subscription_id, customer_id, invoice_type, total, amount_paid, currency, period_start, period_end, status, payment_method_type, paid_at, due_date, nomba_order_ref, nomba_txn_ref, created_at, updated_at
+`
+
+type MarkInvoicePaidParams struct {
+	ID          uuid.UUID          `json:"id"`
+	AmountPaid  int64              `json:"amount_paid"`
+	PaidAt      pgtype.Timestamptz `json:"paid_at"`
+	NombaTxnRef *string            `json:"nomba_txn_ref"`
+}
+
+func (q *Queries) MarkInvoicePaid(ctx context.Context, arg MarkInvoicePaidParams) (Invoice, error) {
+	row := q.db.QueryRow(ctx, markInvoicePaid,
+		arg.ID,
+		arg.AmountPaid,
+		arg.PaidAt,
+		arg.NombaTxnRef,
+	)
+	var i Invoice
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantID,
+		&i.SubscriptionID,
+		&i.CustomerID,
+		&i.InvoiceType,
+		&i.Total,
+		&i.AmountPaid,
+		&i.Currency,
+		&i.PeriodStart,
+		&i.PeriodEnd,
+		&i.Status,
+		&i.PaymentMethodType,
+		&i.PaidAt,
+		&i.DueDate,
+		&i.NombaOrderRef,
+		&i.NombaTxnRef,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateInvoiceOrderRef = `-- name: UpdateInvoiceOrderRef :exec
 UPDATE invoices
 SET nomba_order_ref = $1

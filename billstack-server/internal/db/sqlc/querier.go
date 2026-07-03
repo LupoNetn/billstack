@@ -24,16 +24,23 @@ type Querier interface {
 	CreateMerchantSplitConfig(ctx context.Context, arg CreateMerchantSplitConfigParams) (MerchantsSplitConfig, error)
 	CreateMerchantWebhookConfig(ctx context.Context, arg CreateMerchantWebhookConfigParams) (MerchantsWebhookUrl, error)
 	CreateNewMerchant(ctx context.Context, arg CreateNewMerchantParams) (Merchant, error)
+	CreatePendingCredit(ctx context.Context, arg CreatePendingCreditParams) (PendingCredit, error)
 	CreatePlan(ctx context.Context, arg CreatePlanParams) (Plan, error)
 	CreatePlanTier(ctx context.Context, arg CreatePlanTierParams) (PlanTier, error)
 	CreateSettlementAccount(ctx context.Context, arg CreateSettlementAccountParams) (MerchantsSettlementAccount, error)
 	CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (Subscription, error)
 	CreateSubscriptionEventsTimeline(ctx context.Context, arg CreateSubscriptionEventsTimelineParams) error
+	DeleteExpiredIdempotencyKeys(ctx context.Context) error
+	DeleteIdempotencyKey(ctx context.Context, idempotencyKey string) error
 	DeleteMerchantSplitConfig(ctx context.Context, arg DeleteMerchantSplitConfigParams) (MerchantsSplitConfig, error)
 	GetActiveMerchantKeys(ctx context.Context, merchantID pgtype.UUID) (MerchantsApiKey, error)
 	GetAllSubscriptionsForMerchant(ctx context.Context, arg GetAllSubscriptionsForMerchantParams) ([]Subscription, error)
+	GetDVAByAccountRef(ctx context.Context, accountRef string) (DedicatedVirtualAccount, error)
+	GetDVAByID(ctx context.Context, id uuid.UUID) (DedicatedVirtualAccount, error)
 	GetEmailVerificationCode(ctx context.Context, arg GetEmailVerificationCodeParams) (MerchantEmailVerificationCode, error)
 	GetEmailVerificationStatus(ctx context.Context, id uuid.UUID) (bool, error)
+	GetIdempotencyKey(ctx context.Context, idempotencyKey string) (IdempotencyKey, error)
+	GetInvoiceByNombaOrderRef(ctx context.Context, nombaOrderRef *string) (Invoice, error)
 	GetMerchantApiKey(ctx context.Context, keyHash string) (MerchantsApiKey, error)
 	GetMerchantByEmail(ctx context.Context, email string) (Merchant, error)
 	GetMerchantById(ctx context.Context, id uuid.UUID) (Merchant, error)
@@ -43,16 +50,24 @@ type Querier interface {
 	GetMerchantSplitConfigById(ctx context.Context, arg GetMerchantSplitConfigByIdParams) (MerchantsSplitConfig, error)
 	GetMerchantSplitConfigs(ctx context.Context, merchantID pgtype.UUID) ([]MerchantsSplitConfig, error)
 	GetMerchantWebhookConfig(ctx context.Context, merchantID pgtype.UUID) (MerchantsWebhookUrl, error)
+	GetOpenInvoiceForSubscription(ctx context.Context, subscriptionID uuid.UUID) (Invoice, error)
 	GetPlanByIDAndMerchant(ctx context.Context, arg GetPlanByIDAndMerchantParams) (Plan, error)
 	GetPlanTiers(ctx context.Context, planID uuid.UUID) ([]PlanTier, error)
+	GetSubscriptionByID(ctx context.Context, id uuid.UUID) (Subscription, error)
 	GetSubscriptionForMerchantAndCustomer(ctx context.Context, arg GetSubscriptionForMerchantAndCustomerParams) (Subscription, error)
+	IdempotencyKeyExists(ctx context.Context, idempotencyKey string) (bool, error)
+	InsertProcessedWebhookEvent(ctx context.Context, arg InsertProcessedWebhookEventParams) (ProcessedWebhookEvent, error)
+	InsertWebhookDelivery(ctx context.Context, arg InsertWebhookDeliveryParams) (WebhookDelivery, error)
 	ListPlans(ctx context.Context, arg ListPlansParams) ([]Plan, error)
 	ListPublicPlans(ctx context.Context, merchantID uuid.UUID) ([]Plan, error)
+	MarkInvoicePaid(ctx context.Context, arg MarkInvoicePaidParams) (Invoice, error)
 	RevokeAllMerchantApiKeys(ctx context.Context, merchantID pgtype.UUID) error
 	SetEmailVerificationStatus(ctx context.Context, arg SetEmailVerificationStatusParams) (Merchant, error)
 	SetSubscriptionStatus(ctx context.Context, arg SetSubscriptionStatusParams) error
 	StoreDvaDetails(ctx context.Context, arg StoreDvaDetailsParams) (Subscription, error)
+	StoreIdempotencyResponse(ctx context.Context, arg StoreIdempotencyResponseParams) (IdempotencyKey, error)
 	StoreTokenKey(ctx context.Context, arg StoreTokenKeyParams) (Subscription, error)
+	StoreTokenKeyBySubscriptionID(ctx context.Context, arg StoreTokenKeyBySubscriptionIDParams) (Subscription, error)
 	UpdateApiKeyLastUsage(ctx context.Context, merchantID pgtype.UUID) error
 	UpdateDVAStatus(ctx context.Context, arg UpdateDVAStatusParams) error
 	UpdateEmailVerificationCode(ctx context.Context, arg UpdateEmailVerificationCodeParams) (MerchantEmailVerificationCode, error)
@@ -65,6 +80,7 @@ type Querier interface {
 	UpdateMerchantWebhookConfig(ctx context.Context, arg UpdateMerchantWebhookConfigParams) (MerchantsWebhookUrl, error)
 	UpdatePlan(ctx context.Context, arg UpdatePlanParams) (Plan, error)
 	UpdateSubscriptionDvaId(ctx context.Context, arg UpdateSubscriptionDvaIdParams) error
+	UpdateSubscriptionPeriodAndStatus(ctx context.Context, arg UpdateSubscriptionPeriodAndStatusParams) (Subscription, error)
 	VerifyEmailCodeAtomic(ctx context.Context, arg VerifyEmailCodeAtomicParams) (VerifyEmailCodeAtomicRow, error)
 }
 
