@@ -421,11 +421,11 @@ func (p *PaymentSvc) processDVATransfer(ctx context.Context, qtx *sqlc.Queries, 
 	data.TransactionID = txnID
 
 	if sub.Status == sqlc.SubscriptionStatusPaused {
-		return p.storePendingCredit(ctx, qtx, dva, sub, data, sqlc.PendingCreditReasonReceivedDuringPause, receivedAt, nil)
+		return p.storePendingCredit(ctx, qtx, dva, sub, data, sqlc.PendingCreditReasonReceivedDuringPause, receivedAt)
 	}
 
 	if sub.Status == sqlc.SubscriptionStatusCancelled || sub.Status == sqlc.SubscriptionStatusExpired {
-		if err := p.storePendingCredit(ctx, qtx, dva, sub, data, sqlc.PendingCreditReasonReceivedAfterCancellation, receivedAt, nil); err != nil {
+		if err := p.storePendingCredit(ctx, qtx, dva, sub, data, sqlc.PendingCreditReasonReceivedAfterCancellation, receivedAt); err != nil {
 			return err
 		}
 		return queueMerchantWebhook(ctx, qtx, sub.MerchantID, sub.ID, "dva_payment_after_cancellation", map[string]any{
@@ -441,7 +441,7 @@ func (p *PaymentSvc) processDVATransfer(ctx context.Context, qtx *sqlc.Queries, 
 	}
 
 	if expectedAmount > 0 && data.AmountKobo < expectedAmount {
-		if err := p.storePendingCredit(ctx, qtx, dva, sub, data, sqlc.PendingCreditReasonUnderpayment, receivedAt, nil); err != nil {
+		if err := p.storePendingCredit(ctx, qtx, dva, sub, data, sqlc.PendingCreditReasonUnderpayment, receivedAt); err != nil {
 			return err
 		}
 		return queueMerchantWebhook(ctx, qtx, sub.MerchantID, sub.ID, "dva_underpayment", map[string]any{
@@ -521,7 +521,7 @@ func (p *PaymentSvc) processDVATransfer(ctx context.Context, qtx *sqlc.Queries, 
 	if excess > 0 {
 		overData := data
 		overData.AmountKobo = excess
-		if err := p.storePendingCredit(ctx, qtx, dva, sub, overData, sqlc.PendingCreditReasonOverpayment, receivedAt, nil); err != nil {
+		if err := p.storePendingCredit(ctx, qtx, dva, sub, overData, sqlc.PendingCreditReasonOverpayment, receivedAt); err != nil {
 			return err
 		}
 	}
